@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "家庭圈洞察看板（Vercel 部署）",
   "engines": {
-    "node": ">=18"
+    "node": "18.x"
   }
 }
 
