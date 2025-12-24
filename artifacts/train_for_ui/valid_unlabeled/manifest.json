@@ -1,0 +1,8 @@
+{
+  "sheet_key": "valid_unlabeled",
+  "sheet_name": "无标识的待验证数据",
+  "threshold": 0.64,
+  "n_edges": 573515,
+  "n_users": 100000,
+  "n_families": 19637
+}

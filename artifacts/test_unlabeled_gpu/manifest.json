@@ -1,0 +1,11 @@
+{
+  "threshold":0.61,
+  "train_metrics":{
+    "precision":0.9992910315,
+    "recall":1.0,
+    "f1":0.9996453901
+  },
+  "n_edges":5238,
+  "n_users":2000,
+  "n_families":1282
+}

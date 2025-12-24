@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: wutong-family
+Version: 0.1.0
+Summary: Offline precompute pipeline for Wutong Cup family circle identification
+Requires-Python: >=3.9

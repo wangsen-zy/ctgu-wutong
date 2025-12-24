@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>家庭圈洞察看板</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: rgba(15, 23, 42, 0.10);
+        --shadow: 0 12px 34px rgba(2, 6, 23, 0.08);
+        --brand: #2563eb;
+        --brand2: #7c3aed;
+        --ok: #059669;
+        --warn: #b45309;
+        --err: #dc2626;
+      }
+      * { box-sizing: border-box; }
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        overflow-x: hidden;
+      }
+      a { color: inherit; }
+      .wrap { max-width: 1240px; margin: 0 auto; padding: 18px 18px 30px; position: relative; z-index: 1; }
+
+      /* Parallax background (self-made SVG, no watermark) */
+      .bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .bg .layer {
+        position: absolute;
+        inset: -10%;
+        transform: translate3d(0,0,0);
+        will-change: transform;
+        opacity: 0.85;
+        filter: blur(0.2px);
+      }
+      .bg svg { width: 100%; height: 100%; }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .logo {
+        width: 38px; height: 38px;
+        border-radius: 12px;
+        background: radial-gradient(120% 120% at 30% 20%, rgba(37,99,235,1) 0%, rgba(124,58,237,1) 55%, rgba(16,185,129,0.9) 120%);
+        box-shadow: 0 12px 26px rgba(37,99,235,0.18);
+      }
+      .title { font-size: 18px; font-weight: 800; letter-spacing: 0.2px; }
+      .subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.75);
+        border: 1px solid rgba(15,23,42,0.08);
+        box-shadow: 0 10px 22px rgba(2,6,23,0.06);
+        backdrop-filter: blur(10px);
+      }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .muted { color: var(--muted); font-size: 12px; }
+      .ok { color: var(--ok); }
+      .warn { color: var(--warn); }
+      .err { color: var(--err); }
+
+      .card {
+        background: rgba(255,255,255,0.75);
+        border: 1px solid rgba(15,23,42,0.08);
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(14px);
+      }
+      .grid { display: grid; grid-template-columns: 380px 1fr; gap: 14px; align-items: start; }
+      @media (max-width: 1040px) { .grid { grid-template-columns: 1fr; } }
+      .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+      input, select, textarea {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(15,23,42,0.10);
+        background: rgba(255,255,255,0.95);
+        color: var(--ink);
+        outline: none;
+        transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+      }
+      input:focus, select:focus, textarea:focus {
+        border-color: rgba(37,99,235,0.35);
+        box-shadow: 0 0 0 6px rgba(37,99,235,0.10);
+      }
+      textarea { width: 100%; min-height: 44px; resize: none; }
+      button {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(15,23,42,0.12);
+        background: linear-gradient(135deg, rgba(37,99,235,1) 0%, rgba(124,58,237,1) 100%);
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 10px 18px rgba(37,99,235,0.22);
+        transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+      }
+      button:hover { transform: translateY(-1px); filter: brightness(0.98); }
+      button.secondary {
+        background: rgba(255,255,255,0.95);
+        color: var(--ink);
+        box-shadow: 0 10px 18px rgba(2,6,23,0.06);
+      }
+
+      .kv { display: grid; grid-template-columns: 140px 1fr; gap: 8px 10px; font-size: 12px; }
+      .kv div:nth-child(odd) { color: var(--muted); }
+      .kv div:nth-child(even) { color: var(--ink); }
+      .graph { height: 520px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(15,23,42,0.08); background: rgba(255,255,255,0.85); }
+
+      .split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      @media (max-width: 1040px) { .split { grid-template-columns: 1fr; } }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 9px 8px; border-bottom: 1px solid rgba(15,23,42,0.08); font-size: 12px; }
+      th { text-align: left; color: rgba(15,23,42,0.75); font-weight: 650; }
+
+      .memberPills { display: flex; flex-wrap: wrap; gap: 8px; }
+      .mPill {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 10px; border-radius: 999px;
+        background: rgba(255,255,255,0.8);
+        border: 1px solid rgba(15,23,42,0.08);
+      }
+      .avatar {
+        width: 22px; height: 22px; border-radius: 999px;
+        background: radial-gradient(120% 120% at 30% 20%, rgba(37,99,235,1) 0%, rgba(124,58,237,1) 55%, rgba(16,185,129,0.9) 120%);
+      }
+      .badge {
+        font-size: 11px; padding: 2px 8px; border-radius: 999px;
+        border: 1px solid rgba(15,23,42,0.10);
+        background: rgba(16,185,129,0.12);
+        color: var(--ok);
+      }
+
+      /* Chat UI */
+      .chatWrap { display: grid; grid-template-rows: 1fr auto; gap: 10px; height: 520px; }
+      .chatList {
+        overflow: auto;
+        padding: 10px;
+        border-radius: 14px;
+        border: 1px solid rgba(15,23,42,0.08);
+        background: rgba(255,255,255,0.72);
+      }
+      .msg { display: flex; margin: 10px 0; }
+      .msg.user { justify-content: flex-end; }
+      .bubble {
+        max-width: 78%;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(15,23,42,0.10);
+        background: rgba(255,255,255,0.95);
+        box-shadow: 0 10px 18px rgba(2,6,23,0.06);
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+      .msg.user .bubble {
+        background: linear-gradient(135deg, rgba(37,99,235,0.92) 0%, rgba(124,58,237,0.92) 100%);
+        border-color: rgba(37,99,235,0.22);
+        color: #fff;
+      }
+      .bubble h4 { margin: 0 0 6px; font-size: 13px; }
+      .bubble ul { margin: 6px 0 0 18px; padding: 0; }
+      .bubble li { margin: 4px 0; }
+      .sec { margin-top: 10px; }
+      .sec:first-child { margin-top: 0; }
+      .secTitle { font-size: 12px; color: rgba(15,23,42,0.65); font-weight: 700; margin-bottom: 6px; }
+      .pre {
+        margin: 8px 0 0;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(15,23,42,0.10);
+        background: rgba(2,6,23,0.04);
+        overflow: auto;
+        max-height: 260px;
+      }
+      .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+      .tag { font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(15,23,42,0.10); background: rgba(255,255,255,0.85); }
+      .tag.risk { background: rgba(220,38,38,0.10); border-color: rgba(220,38,38,0.22); color: #991b1b; }
+      .tag.ok { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.20); color: #065f46; }
+      details.qa { margin-top: 8px; border: 1px solid rgba(15,23,42,0.08); border-radius: 12px; padding: 8px 10px; background: rgba(255,255,255,0.75); }
+      details.qa summary { cursor: pointer; font-weight: 650; }
+      details.qa .ans { margin-top: 6px; color: rgba(15,23,42,0.85); }
+      details.qa.raw summary { color: rgba(15,23,42,0.7); }
+      .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+      .chip {
+        border: 1px solid rgba(15,23,42,0.10);
+        background: rgba(255,255,255,0.95);
+        color: var(--ink);
+        padding: 8px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .chip:hover { filter: brightness(0.98); }
+      .chatBar { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+      .chatBar textarea { height: 44px; }
+      .rightColSticky { position: sticky; top: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true">
+      <div class="layer" id="bg1">
+        <svg viewBox="0 0 1200 700" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2563eb" stop-opacity="0.10"/>
+              <stop offset="1" stop-color="#7c3aed" stop-opacity="0.08"/>
+            </linearGradient>
+          </defs>
+          <rect width="1200" height="700" fill="url(#g1)"/>
+          <circle cx="220" cy="160" r="180" fill="#2563eb" fill-opacity="0.07"/>
+          <circle cx="980" cy="160" r="220" fill="#7c3aed" fill-opacity="0.06"/>
+          <circle cx="920" cy="560" r="240" fill="#10b981" fill-opacity="0.05"/>
+        </svg>
+      </div>
+      <div class="layer" id="bg2" style="opacity:0.55;">
+        <svg viewBox="0 0 1200 700" preserveAspectRatio="none">
+          <defs>
+            <radialGradient id="g2" cx="30%" cy="25%" r="75%">
+              <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+              <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <path d="M0,500 C200,440 260,620 460,560 C650,505 680,420 850,380 C1040,335 1100,420 1200,360 L1200,700 L0,700 Z" fill="rgba(37,99,235,0.05)"/>
+          <path d="M0,220 C180,120 300,260 460,210 C620,160 720,60 900,130 C1060,190 1120,110 1200,160 L1200,0 L0,0 Z" fill="rgba(124,58,237,0.05)"/>
+          <rect width="1200" height="700" fill="url(#g2)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <div class="title">家庭圈洞察看板</div>
+            <div class="subtitle">查询家庭成员 · 关键人 · 画像 · 关系图 · 智能解读</div>
+          </div>
+        </div>
+        <div class="pill"><span class="muted">DB</span> <span id="dbStatus" class="mono warn">loading...</span></div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div style="font-weight: 800; margin-bottom: 8px;">快速查询</div>
+          <div class="row" style="margin-bottom: 10px;">
+            <input id="subsInput" class="mono" placeholder="输入 subs_id" style="width: 220px;" />
+            <select id="datasetSelect" class="mono" title="同一 subs_id 可能在多个数据集中命中">
+              <option value="">（自动：任意数据集）</option>
+            </select>
+            <button id="btnQuery">查询</button>
+          </div>
+          <div id="datasetHint" class="muted" style="margin-bottom: 10px;"></div>
+
+          <div class="card" style="padding: 12px; margin-bottom: 12px;">
+            <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+              <div style="font-weight: 800;">概览</div>
+              <div class="pill"><span class="muted">threshold</span> <span id="threshold" class="mono">-</span></div>
+            </div>
+            <div id="basicInfo" class="kv"></div>
+          </div>
+
+          <div class="card" style="padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; margin-bottom: 8px;">模型表现</div>
+            <div id="cvInfo" class="kv"></div>
+          </div>
+
+          <div class="card" style="padding: 12px;">
+            <div style="font-weight: 800; margin-bottom: 8px;">家庭成员</div>
+            <div id="members" class="memberPills">-</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom: 14px;">
+            <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+              <div style="font-weight: 800;">家庭关系图</div>
+              <div class="pill"><span class="muted">edges</span> <span id="edgeCount" class="mono">-</span></div>
+            </div>
+            <div id="graph" class="graph"></div>
+          </div>
+
+          <div class="split">
+            <div class="card">
+              <div style="font-weight: 800; margin-bottom: 8px;">家庭画像</div>
+              <div id="profile" class="kv"></div>
+            </div>
+            <div class="card">
+              <div style="font-weight: 800; margin-bottom: 8px;">证据边</div>
+              <div style="max-height: 360px; overflow: auto;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>u</th>
+                      <th>v</th>
+                      <th>prob</th>
+                      <th>rule</th>
+                      <th>calls</th>
+                    </tr>
+                  </thead>
+                  <tbody id="edgeTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card rightColSticky" style="margin-top: 14px;">
+            <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+              <div style="font-weight: 800;">智能客服</div>
+              <div class="pill"><span class="muted">AI</span> <span id="aiStatus" class="mono muted">off</span></div>
+            </div>
+            <div class="chips" style="margin-bottom: 10px;">
+              <div class="chip" id="chipExplain">一键解读</div>
+              <div class="chip" id="chipOps">运营建议</div>
+              <div class="chip" id="chipRisk">风险排查</div>
+              <div class="chip" id="chipWhy">为什么是关键人？</div>
+            </div>
+            <div class="chatWrap">
+              <div id="chatList" class="chatList"></div>
+              <div class="chatBar">
+                <textarea id="aiQuestion" placeholder="请输入问题，例如：这个家庭有几口人？"></textarea>
+                <button id="btnAiSend">发送</button>
+              </div>
+            </div>
+            <div id="aiOutput" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- sql.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+    <!-- vis-network -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
+
+

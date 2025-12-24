@@ -1,0 +1,8 @@
+{
+  "sheet_key": "train",
+  "sheet_name": "已知家庭圈标识数据",
+  "threshold": 0.64,
+  "n_edges": 14778,
+  "n_users": 5002,
+  "n_families": 1443
+}

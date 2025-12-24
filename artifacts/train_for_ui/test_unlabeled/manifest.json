@@ -1,0 +1,8 @@
+{
+  "sheet_key": "test_unlabeled",
+  "sheet_name": "新增用户测试数据",
+  "threshold": 0.64,
+  "n_edges": 5238,
+  "n_users": 2000,
+  "n_families": 1282
+}

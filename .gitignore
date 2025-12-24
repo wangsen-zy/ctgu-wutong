@@ -1,0 +1,29 @@
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Node / frontend build outputs
+node_modules/
+.next/
+dist/
+build/
+
+# Data / artifacts (keep tracked unless you explicitly remove; adjust as needed)
+# artifacts/
+# dataset/
+
