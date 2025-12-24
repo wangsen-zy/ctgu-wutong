@@ -1,26 +1,26 @@
 {
-  "test_unlabeled":{
-    "sheet_key":"test_unlabeled",
-    "sheet_name":"新增用户测试数据",
-    "threshold":0.64,
-    "n_edges":5238,
-    "n_users":2000,
-    "n_families":1282
-  },
-  "train":{
+  "train_fix1":{
     "sheet_key":"train",
     "sheet_name":"已知家庭圈标识数据",
-    "threshold":0.64,
+    "threshold":0.65,
     "n_edges":14778,
     "n_users":5002,
-    "n_families":1443
+    "n_families":2307
   },
-  "valid_unlabeled":{
+  "valid_fix1":{
     "sheet_key":"valid_unlabeled",
     "sheet_name":"无标识的待验证数据",
-    "threshold":0.64,
+    "threshold":0.62,
     "n_edges":573515,
     "n_users":100000,
-    "n_families":19637
+    "n_families":58784
+  },
+  "test_fix1":{
+    "sheet_key":"test_unlabeled",
+    "sheet_name":"新增用户测试数据",
+    "threshold":0.68,
+    "n_edges":5238,
+    "n_users":2000,
+    "n_families":1782
   }
 }
