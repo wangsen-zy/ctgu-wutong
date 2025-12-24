@@ -27,6 +27,11 @@ build/
 dataset/
 scripts/
 
+# DO NOT COMMIT (private notes / notebooks)
+baseline_main_0.8916.ipynb
+技术路径备忘录-家庭圈用户识别模型-A_B方案.md
+.ipynb_checkpoints/
+
 # Data / artifacts (keep tracked unless you explicitly remove; adjust as needed)
 # artifacts/
 
