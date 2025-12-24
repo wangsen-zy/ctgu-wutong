@@ -23,7 +23,10 @@ node_modules/
 dist/
 build/
 
+# DO NOT COMMIT (core method / data)
+dataset/
+scripts/
+
 # Data / artifacts (keep tracked unless you explicitly remove; adjust as needed)
 # artifacts/
-# dataset/
 
